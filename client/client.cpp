@@ -9,8 +9,8 @@ bool CClient::dispatch_received_data()
 {
 	switch (m_buf.type)
 	{
-	case	protocol_version_request: m_pipe.send(Protocol_version, msg_type::protocol_version); break;
-	case	protocol_version:
+	case	msg_type::protocol_version_request: m_pipe.send(Protocol_version, msg_type::protocol_version); break;
+	case	msg_type::protocol_version:
 	{
 		m_version_ok = m_buf.data == Protocol_version;
 		if (m_version_ok)
@@ -20,27 +20,27 @@ bool CClient::dispatch_received_data()
 		break;
 	}
 
-	case	description_request: 
+	case	msg_type::description_request:
 		m_pipe.send_container(m_description, msg_type::description); 
 		break;
 
-	case	description:
+	case	msg_type::description:
 	{
-		m_server_description.assign(m_buf.raw_data.data(), m_buf.data);
+		m_server_description.assign(m_buf.raw_data, m_buf.data);
 		std::cout << "server description: " << m_server_description << '\n';
 		break;
 	}
 
-	case	clientID:
+	case	msg_type::clientID:
 	{
 		m_ID = m_buf.data;
 		std::cout << "this client ID: " << m_ID << '\n';
 		break;
 	}
 
-	case	string_msg:					
+	case	msg_type::string_msg:
 	{
-		std::string_view s{ m_buf.raw_data.data(), m_buf.data };
+		std::string_view s{ m_buf.raw_data, m_buf.data };
 		std::cout << "server sent string: " << s << '\n';
 		break;
 	}
@@ -77,7 +77,7 @@ std::optional<std::string_view>  CClient::recieve_string()
 	if (auto received_size = m_pipe.receive(&m_buf, sizeof(m_buf)))
 	{
 		if (received_size > 8)
-			return std::string_view{ m_buf.raw_data.data(), size_t(m_buf.data) };
+			return std::string_view{ m_buf.raw_data, m_buf.data };
 	}
 	return std::nullopt;
 }
@@ -85,7 +85,7 @@ std::optional<std::string_view>  CClient::recieve_string()
 
 bool CClient::communicate_with_object(DWORD id)
 {
-	message_rpc_t msg{ msg_type::call_method, id, distributed_methods::get_class_name };
+	message_rpc_t msg{ msg_type::call_method, id, distributed_methods::get_class_name, 0};
 	if (!m_pipe.send(&msg, sizeof(msg))) return false;
 	//requesting object's clss name
 	if (auto class_name = recieve_string())

@@ -118,13 +118,13 @@ void PipeCommunicate(CNamedPipeServer &&pipe)
 			{
 				switch (buf->type)
 				{
-				case	protocol_version_request:		
+				case	msg_type::protocol_version_request:
 				{
 					std::cout << "client #" << client->get_ID() << " asks protocol version\n";
 					pipe.send(Protocol_version, msg_type::protocol_version);
 					break;
 				}
-				case	protocol_version:				
+				case	msg_type::protocol_version:
 				{
 					auto ver = buf->data;
 					if (ver != Protocol_version)
@@ -132,35 +132,35 @@ void PipeCommunicate(CNamedPipeServer &&pipe)
 					break;
 				}
 
-				case	description_request:
+				case	msg_type::description_request:
 				{
 					std::cout << "client #" << client->get_ID() << " asks description\n";
 					pipe.send_container(std::string_view{ "I'm a pipe server!" }, msg_type::description);
 					break;
 				}
-				case	description:					
+				case	msg_type::description:
 				{
-					std::string_view s{ buf->raw_data.data(), size_t(buf->data) };
+					std::string_view s{ buf->raw_data, buf->data };
 					std::cout << "client #" << client->get_ID() << " sent it's description: " << s << '\n';
 					break;
 				}
-				case	clientID_request: pipe.send(client->get_ID(), msg_type::clientID); break;
-				case	string_msg:							//DWORD(size_in_bytes) + string_data;
+				case	msg_type::clientID_request: pipe.send(client->get_ID(), msg_type::clientID); break;
+				case	msg_type::string_msg:					
 				{
-					std::string_view s{ buf->raw_data.data(), size_t(buf->data) };
+					std::string_view s{ buf->raw_data, buf->data };
 					std::cout << "client #" << client->get_ID() << " sent string: " << s << '\n';
 					break;
 				}
 
-				case	blob:							//DWORD(size_in_bytes) + blob_data;
-				case	create_object:					//int(object_tipe_number); waiting for responce: object_handle;
+				case	msg_type::blob:							
+				case	msg_type::create_object:				
 				{
-					auto result = client->create(distributed_classes{ buf->data });
+					auto result = client->create(distributed_classes( buf->data ));
 					pipe.send(result, msg_type::created_object);
 					break;
 				}
-				case	delete_object:						client->destroy(int(buf->data)); break;
-				case	call_method:			
+				case	msg_type::delete_object:						client->destroy(int(buf->data)); break;
+				case	msg_type::call_method:
 				{
 					message_rpc_t const& msg = *reinterpret_cast<message_rpc_t const *>(buf.get());
 					client->execute(DWORD(buf->data), msg.method_ID, &msg.param, pipe);
@@ -205,7 +205,7 @@ public:
 Cthreads_keeper threads_keeper;	//static instance of the class
 
 /// a routine for handling Ctrl-C and Ctrl-F4 keyboard shortcuts along with closing the console window.
-BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType)
+BOOL WINAPI HandlerRoutine(_In_ DWORD /*dwCtrlType*/)
 {
 	flag_shutdown = true;
 	// most of the threads are usually waiting for connection. So, connect for wakening them.

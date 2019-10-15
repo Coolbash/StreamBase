@@ -23,7 +23,7 @@ private:
 class distributed_int : public distributed
 {
 public:
-	distributed_int(int client_ID);
+	distributed_int(DWORD client_ID);
 	~distributed_int() override;
 	std::string_view get_class_name() override;
 	bool set_param(simple_variant_t param) override;
@@ -37,7 +37,7 @@ private:
 class distributed_double : public distributed
 {
 public:
-	distributed_double(int client_ID);
+	distributed_double(DWORD client_ID);
 	~distributed_double() override;
 	std::string_view get_class_name() override;
 	bool set_param(simple_variant_t param) override;

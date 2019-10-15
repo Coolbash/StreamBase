@@ -17,7 +17,7 @@ std::string_view distributed::get_class_name()
 }
 //---------------------------------------------------------------
 
-distributed_int::distributed_int(int client_num) :distributed{client_num}
+distributed_int::distributed_int(DWORD client_num) :distributed{client_num}
 {
 	std::cout << "created instance #" << get_ID() << " of distributed_int for client #" << client_num << '\n';
 }
@@ -56,7 +56,7 @@ simple_variant_t distributed_int::get_param()
 }
 //---------------------------------------------------------------
 
-distributed_double::distributed_double(int client_num) :distributed{ client_num }
+distributed_double::distributed_double(DWORD client_num) :distributed{ client_num }
 {
 	std::cout << "created instance #" << get_ID() << " of distributed_double for client #" << client_num << '\n';
 }

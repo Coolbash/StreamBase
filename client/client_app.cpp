@@ -7,9 +7,9 @@
 int main()
 {
     std::cout << "I'm a client!\n";
-	CClient client;
-	if (client.open_pipe())
-		client.communicate();
+	auto client = std::make_unique<CClient>(); //creating the object in heap for not using much stack
+	if (client->open_pipe())
+		client->communicate();
 
 	return 0;
 }

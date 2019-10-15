@@ -18,7 +18,7 @@ int constexpr	max_connections = 4;
 constexpr LPCSTR PipeName = R"(\\.\pipe\StreamBase)";
 
 ///type of messages; it includes in every message 
-enum msg_type
+enum class msg_type
 {
 	protocol_version_request,		///< nothing; waiting responce protocol_version
 	protocol_version,				///< DWORD
@@ -64,11 +64,12 @@ template<typename T>struct simple_t { msg_type t; T data; };	//for simple data l
 template<typename T>struct blob_t	{ msg_type t; DWORD size; T data;}; //for blob data like string and binary
 template<typename T>struct method_t { msg_type t; int handle; simple_variant_t param;}; //for calling a method of remote objects and returning result
 
+///working structure for receiving data from a pipe
 struct message_t
 {
-	msg_type	type; ///< the only field that exist always
-	DWORD		data; ///< DWORD data. Might be size of blob (in elements), ID, handle, etc
-	std::array<char, max_message_length> raw_data; ///< data of string, blob, or other binary data any size less than max_message_length
+	msg_type	type = msg_type::protocol_version_request;	///< the only field that exist always
+	DWORD		data = 0;									///< DWORD data. Might be size of blob (in elements), ID, handle, etc
+	char		raw_data[max_message_length] = { 0 };		///< data of string, blob, or other binary data any size less than max_message_length
 };
 
 //data strucure of messages for calling methods

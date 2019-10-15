@@ -26,6 +26,6 @@ private:
 	message_t		m_buf;						///< the buffer for reading from the pipe.
 	std::string		m_server_description;		///< description string, received from the server
 	DWORD			m_ID = 0;					///< number of this client received from the server
-	bool			m_version_ok = false;		///< indicates if protocol versions of the server and the client are correspond
 	static std::string_view m_description;		///< description of the client proccess for sending to server
+	bool			m_version_ok = false;		///< indicates if protocol versions of the server and the client are correspond
 };
